@@ -5,29 +5,36 @@ from openai import OpenAI
 
 load_dotenv()
 
-client = OpenAI(
-    base_url=os.getenv("NVIDIA_BASE_URL"),
-    api_key=os.getenv("NVIDIA_API_KEY"),
-)
+NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY")
+NVIDIA_BASE_URL = os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1")
+MODEL = os.getenv("NVIDIA_MODEL", "meta/llama-3.1-8b-instruct")
 
-MODEL = os.getenv("NVIDIA_MODEL", "meta/llama3-70b-instruct")
+client = OpenAI(
+    base_url=NVIDIA_BASE_URL,
+    api_key=NVIDIA_API_KEY,
+)
 
 
 def analyze_conversation(text: str, context_type: str) -> dict:
+    if not NVIDIA_API_KEY:
+        raise ValueError("NVIDIA_API_KEY manquante dans le fichier .env")
+
     prompt = f"""
 Tu es TrustLens AI, un assistant d'analyse de cohérence conversationnelle.
 
-IMPORTANT :
-- Tu ne dois jamais dire qu'une personne ment.
-- Tu analyses uniquement la cohérence, les ambiguïtés, les émotions et les points à clarifier.
+Règles :
+- Ne dis jamais qu'une personne ment.
+- Analyse seulement la cohérence, les ambiguïtés, les émotions et les points à clarifier.
 - Réponds uniquement en JSON valide.
+- Pas de markdown.
+- Le score doit être entre 0 et 100.
 
 Type de contexte : {context_type}
 
-Texte à analyser :
+Texte :
 {text}
 
-Retourne exactement ce format JSON :
+Format JSON obligatoire :
 {{
   "coherence_score": 0,
   "dominant_emotions": ["emotion1", "emotion2"],
@@ -36,7 +43,7 @@ Retourne exactement ce format JSON :
     {{
       "title": "titre du point",
       "explanation": "explication claire",
-      "severity": "low|medium|high"
+      "severity": "low"
     }}
   ],
   "suggested_questions": ["question 1", "question 2"],
@@ -53,28 +60,13 @@ Retourne exactement ce format JSON :
             },
             {"role": "user", "content": prompt},
         ],
-        temperature=0.3,
-        max_tokens=1200,
+        temperature=0.2,
+        max_tokens=900,
     )
 
-    content = completion.choices[0].message.content
+    content = completion.choices[0].message.content.strip()
 
-    try:
-        return json.loads(content)
-    except json.JSONDecodeError:
-        return {
-            "coherence_score": 50,
-            "dominant_emotions": ["indéterminé"],
-            "summary": "L'analyse a été générée mais le format JSON était invalide.",
-            "issues": [
-                {
-                    "title": "Format de réponse invalide",
-                    "explanation": content,
-                    "severity": "medium",
-                }
-            ],
-            "suggested_questions": [
-                "Peux-tu reformuler les points principaux ?"
-            ],
-            "final_advice": "Relancer l’analyse avec un texte plus clair.",
-        }
+    if content.startswith("```"):
+        content = content.replace("```json", "").replace("```", "").strip()
+
+    return json.loads(content)

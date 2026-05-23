@@ -40,4 +40,5 @@ def analyze(request: AnalysisRequest):
         )
         return result
     except Exception as e:
+        print("ERROR ANALYZE:", repr(e))
         raise HTTPException(status_code=500, detail=str(e))
