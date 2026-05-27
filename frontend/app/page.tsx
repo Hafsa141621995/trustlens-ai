@@ -46,24 +46,34 @@ export default function Home() {
 
           <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl">
             <div className="rounded-2xl bg-black/40 p-5">
-              <p className="text-sm text-white/50">Insight détecté</p>
-              <h2 className="mt-3 text-2xl font-semibold">
-                Changement de version repéré
+              <div className="mb-4 flex items-center justify-between">
+                <p className="text-sm text-cyan-300">Prévisualisation</p>
+
+                <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs text-cyan-200">
+                  Exemple fictif
+                </span>
+              </div>
+
+              <h2 className="text-2xl font-semibold">
+                Analyse conversationnelle
               </h2>
+
               <p className="mt-4 text-white/60">
-                Le discours contient plusieurs formulations contradictoires sur
-                la disponibilité et la chronologie des événements.
+                TrustLens AI structure les échanges texte afin de détecter
+                les incohérences, tensions émotionnelles et zones à clarifier.
               </p>
 
               <div className="mt-6 space-y-3">
                 <div className="rounded-xl bg-white/10 p-4">
-                  Score de cohérence : <span className="font-bold">62%</span>
+                  ✓ Détection des contradictions
                 </div>
+
                 <div className="rounded-xl bg-white/10 p-4">
-                  Ton dominant : incertain, défensif
+                  ✓ Analyse émotionnelle du discours
                 </div>
+
                 <div className="rounded-xl bg-white/10 p-4">
-                  Action suggérée : demander une clarification précise
+                  ✓ Génération de questions de clarification
                 </div>
               </div>
             </div>
